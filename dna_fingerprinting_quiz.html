@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -74,27 +75,45 @@ const baseTopics = [
 "Banding patterns are compared between samples."
 ];
 
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
 let questions = [];
 
 for(let i=1;i<=100;i++){
     let correct = baseTopics[i % baseTopics.length];
+
+    let options = [
+        "DNA fingerprinting changes DNA",
+        correct,
+        "Everyone has identical DNA",
+        "DNA fingerprinting uses physical fingerprints only"
+    ];
+
+    options = shuffle(options);
+
     questions.push({
         question: `DNA Fingerprinting Question ${i}: Which statement is correct?`,
-        options:[
-            "DNA fingerprinting changes DNA",
-            correct,
-            "Everyone has identical DNA",
-            "DNA fingerprinting uses physical fingerprints only"
-        ],
-        answer:1,
-        explanation:`Correct answer: "${correct}". DNA profiling compares natural DNA differences. It does not change DNA, people do not share identical DNA patterns, and it uses genetic material—not fingerprints.`
+        options: options,
+        answer: options.indexOf(correct),
+        explanation: `Correct answer: "${correct}". DNA profiling compares natural DNA differences. It does not change DNA, people do not share identical DNA patterns, and it uses genetic material—not fingerprints.`
     });
 }
 
+// Shuffle question order each time page loads
+questions = shuffle(questions);
+
 let current = 0;
 let score = 0;
+let answered = false;
 
 function showQuestion(){
+    answered = false;
     const q = questions[current];
     document.getElementById("question").innerText = q.question;
 
@@ -108,6 +127,10 @@ function showQuestion(){
 }
 
 function checkAnswer(index){
+    if(answered) return;
+
+    answered = true;
+
     const q = questions[current];
     const buttons = document.querySelectorAll("#answers button");
 
