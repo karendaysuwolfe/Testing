@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biology EOC Practice Test - Learning Mode</title>
+<style>
+:root{
+  --bg:#0f172a; --panel:#111827; --panel2:#1e293b; --line:#334155; --text:#e5e7eb;
+  --muted:#94a3b8; --accent:#2563eb; --good:#166534; --bad:#991b1b;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{padding:26px 20px;background:linear-gradient(135deg,#0f172a,#1e293b);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+header h1{margin:0 0 8px 0;font-size:30px}
+header p{margin:0;color:var(--muted);max-width:1000px;line-height:1.5}
+.container{max-width:1450px;margin:0 auto;padding:18px}
+.layout{display:grid;grid-template-columns:420px 1fr;gap:18px}
+@media (max-width:1100px){.layout{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin:16px 0}
+.sticky{position:sticky;top:110px}
+.answer-grid{display:grid;gap:10px}
+.q-row{display:grid;grid-template-columns:48px 52px 1fr;gap:10px;align-items:start;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
+.q-row.wide{grid-template-columns:48px 52px 1fr}
+.q-num{font-size:18px;font-weight:700;text-align:center;padding-top:6px}
+.q-type{font-size:12px;color:var(--muted);text-align:center;padding-top:8px}
+.q-inputs{display:flex;gap:8px;flex-wrap:wrap}
+.q-inputs.column{flex-direction:column}
+.pill input{position:absolute;opacity:0;pointer-events:none}
+.pill{position:relative}
+.pill span{display:inline-flex;justify-content:center;align-items:center;width:42px;height:38px;border-radius:10px;background:#0f172a;border:1px solid var(--line);font-weight:700}
+.pill input:checked + span{background:var(--accent);border-color:#60a5fa}
+.drop,.text-input{padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0f172a;color:white;font-size:15px}
+.text-input.small{width:90px}
+.drop{min-width:220px}
+.check-item{display:flex;gap:10px;align-items:flex-start;line-height:1.35}
+.check-item input{margin-top:4px}
+.ddline{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pages-wrap{display:grid;gap:16px}
+.test-page{width:100%;display:block;border-radius:14px;background:white}
+button{border:none;border-radius:10px;padding:12px 16px;cursor:pointer;font-weight:700}
+.primary{background:var(--accent);color:white}
+.secondary{background:#334155;color:white}
+.actionbar{display:flex;flex-wrap:wrap;gap:12px}
+.badge{display:inline-block;padding:6px 10px;border-radius:999px;background:#1d4ed8;font-size:12px;font-weight:700}
+.muted{color:var(--muted);line-height:1.5}
+.good{outline:2px solid #22c55e}
+.bad{outline:2px solid #ef4444}
+.hidden{display:none}
+.result-box{padding:16px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}
+.score-big{font-size:42px;font-weight:800;margin:8px 0}
+.wrong-item,.correct-item{padding:12px;border-radius:10px;margin:12px 0}
+.wrong-item{background:#3f0d12;border-left:4px solid #f87171}
+.correct-item{background:#052e16;border-left:4px solid #22c55e}
+
+.feedback{margin-top:8px;padding:12px;border-radius:10px;display:none}
+.feedback.good{display:block;background:#052e16;border-left:4px solid #22c55e}
+.feedback.bad{display:block;background:#3f0d12;border-left:4px solid #f87171}
+.control-line{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Biology EOC Practice Test — Learning Mode</h1>
+  <p>Option B style: answer a question and check it right away. You get instant feedback, the correct answer, and an explanation before moving on.</p>
+</header>
+<div class="container">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+      <div><span class="badge">50 Questions</span> <span class="badge" style="background:#7c3aed">Instant feedback</span></div>
+      <div class="actionbar">
+        <button class="secondary" onclick="window.scrollTo({top:0,behavior:'smooth'})">Top</button>
+        <button class="secondary" onclick="showQuestion(currentQuestion)">Go to Current</button>
+      </div>
+    </div>
+    <p class="muted">This mode is built for studying. The test booklet stays visible, but you work one answer at a time and see the explanation immediately.</p>
+  </div>
+  <div class="layout">
+    <div class="sticky">
+      <div class="card">
+        <h2>Question Navigator</h2>
+        <div class="muted">Question <span id="navNow">1</span> of 50</div>
+        <div class="actionbar" style="margin-top:12px">
+          <button class="secondary" onclick="prevQuestion()">Previous</button>
+          <button class="secondary" onclick="nextQuestion()">Next</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 id="qTitle">Question 1</h2>
+        <div id="singleQuestionArea"></div>
+        <div class="control-line">
+          <button class="primary" onclick="checkCurrent()">Check Answer</button>
+          <button class="secondary" onclick="nextQuestion()">Next Question</button>
+        </div>
+        <div id="feedbackBox" class="feedback"></div>
+      </div>
+
+      <div class="card">
+        <h2>Progress</h2>
+        <div class="muted">Correct so far: <span id="progressScore">0</span></div>
+        <div class="muted">Answered: <span id="progressAnswered">0</span> / 50</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>Test Booklet</h2>
+        <div class="pages-wrap"><img class="test-page" src="assets/page_03.png" alt="Biology test page 3">
+<img class="test-page" src="assets/page_04.png" alt="Biology test page 4">
+<img class="test-page" src="assets/page_05.png" alt="Biology test page 5">
+<img class="test-page" src="assets/page_06.png" alt="Biology test page 6">
+<img class="test-page" src="assets/page_07.png" alt="Biology test page 7">
+<img class="test-page" src="assets/page_08.png" alt="Biology test page 8">
+<img class="test-page" src="assets/page_09.png" alt="Biology test page 9">
+<img class="test-page" src="assets/page_10.png" alt="Biology test page 10">
+<img class="test-page" src="assets/page_11.png" alt="Biology test page 11">
+<img class="test-page" src="assets/page_12.png" alt="Biology test page 12">
+<img class="test-page" src="assets/page_13.png" alt="Biology test page 13">
+<img class="test-page" src="assets/page_14.png" alt="Biology test page 14">
+<img class="test-page" src="assets/page_15.png" alt="Biology test page 15">
+<img class="test-page" src="assets/page_16.png" alt="Biology test page 16">
+<img class="test-page" src="assets/page_17.png" alt="Biology test page 17">
+<img class="test-page" src="assets/page_18.png" alt="Biology test page 18">
+<img class="test-page" src="assets/page_19.png" alt="Biology test page 19">
+<img class="test-page" src="assets/page_20.png" alt="Biology test page 20">
+<img class="test-page" src="assets/page_21.png" alt="Biology test page 21">
+<img class="test-page" src="assets/page_22.png" alt="Biology test page 22">
+<img class="test-page" src="assets/page_23.png" alt="Biology test page 23">
+<img class="test-page" src="assets/page_24.png" alt="Biology test page 24">
+<img class="test-page" src="assets/page_25.png" alt="Biology test page 25">
+<img class="test-page" src="assets/page_26.png" alt="Biology test page 26">
+<img class="test-page" src="assets/page_27.png" alt="Biology test page 27">
+<img class="test-page" src="assets/page_28.png" alt="Biology test page 28">
+<img class="test-page" src="assets/page_29.png" alt="Biology test page 29">
+<img class="test-page" src="assets/page_30.png" alt="Biology test page 30">
+<img class="test-page" src="assets/page_31.png" alt="Biology test page 31">
+<img class="test-page" src="assets/page_32.png" alt="Biology test page 32">
+<img class="test-page" src="assets/page_33.png" alt="Biology test page 33">
+<img class="test-page" src="assets/page_34.png" alt="Biology test page 34">
+<img class="test-page" src="assets/page_35.png" alt="Biology test page 35">
+<img class="test-page" src="assets/page_36.png" alt="Biology test page 36">
+<img class="test-page" src="assets/page_37.png" alt="Biology test page 37">
+<img class="test-page" src="assets/page_38.png" alt="Biology test page 38">
+<img class="test-page" src="assets/page_39.png" alt="Biology test page 39">
+<img class="test-page" src="assets/page_40.png" alt="Biology test page 40">
+<img class="test-page" src="assets/page_41.png" alt="Biology test page 41">
+<img class="test-page" src="assets/page_42.png" alt="Biology test page 42">
+<img class="test-page" src="assets/page_43.png" alt="Biology test page 43">
+<img class="test-page" src="assets/page_44.png" alt="Biology test page 44">
+<img class="test-page" src="assets/page_45.png" alt="Biology test page 45">
+<img class="test-page" src="assets/page_46.png" alt="Biology test page 46">
+<img class="test-page" src="assets/page_47.png" alt="Biology test page 47">
+<img class="test-page" src="assets/page_48.png" alt="Biology test page 48">
+<img class="test-page" src="assets/page_49.png" alt="Biology test page 49">
+<img class="test-page" src="assets/page_50.png" alt="Biology test page 50"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+
+const answers = {"1": "A", "2": "A", "3": "D", "4": "C", "5": "A", "6": "D", "7": "B", "8": "A", "9": "D", "10": "A", "11": "C", "12": "maintains homeostasis; to exit the cell.", "13": "A", "14": "C", "15": ["The red drum only receives energy by consuming finger mullets.", "The phytoplankton produce oxygen and glucose the heron needs to survive.", "The phytoplankton population has the most energy available because it is at the bottom of the food chain."], "16": "B", "17": "D", "18": "B", "19": "A", "20": "A", "21": ["AB", "BO", "OO"], "22": "D", "23": "C", "24": "B", "25": "A", "26": "B", "27": ["The sharks have been able to adapt to changes in their environment.", "Individuals differ from one another as a result of genetic diversity.", "The average number of births has been greater than the average number of deaths in the population."], "28": "B", "29": "D", "30": {"1_characteristic": "more than 5 needles in each cluster", "2_scientific": "Pinus strobus", "3_both": "long needles clustered in pairs; Pinus resinosa", "4_characteristic": "short needles clustered in pairs"}, "31": "C", "32": "C", "33": "A", "34": "D", "35": "B", "36": "diploid; fertilization.", "37": "C", "38": "multiple genes; wide", "39": "A", "40": "B", "41": "D", "42": "C", "43": "A", "44": "D", "45": "C", "46": "D", "47": "D", "48": "C", "49": "A", "50": "B"};
+const types = {"1": "MC", "2": "MC", "3": "MC", "4": "MC", "5": "MC", "6": "MC", "7": "MC", "8": "MC", "9": "MC", "10": "MC", "11": "MC", "12": "IC", "13": "MC", "14": "MC", "15": "MS", "16": "MC", "17": "MC", "18": "MC", "19": "MC", "20": "MC", "21": "DD", "22": "MC", "23": "MC", "24": "MC", "25": "MC", "26": "MC", "27": "MS", "28": "MC", "29": "MC", "30": "DD", "31": "MC", "32": "MC", "33": "MC", "34": "MC", "35": "MC", "36": "IC", "37": "MC", "38": "IC", "39": "MC", "40": "MC", "41": "MC", "42": "MC", "43": "MC", "44": "MC", "45": "MC", "46": "MC", "47": "MC", "48": "MC", "49": "MC", "50": "MC"};
+const explanations = {"1": "DNA has a double-stranded deoxyribose-phosphate backbone, and its bases are adenine, thymine, cytosine, and guanine.", "2": "Adding more of the needed enzyme usually speeds up the reaction because more enzyme-substrate collisions can happen.", "3": "With less rainfall, flowering plants make less nectar, so hummingbirds lose food sources and only better-adapted individuals are more likely to survive.", "4": "Prokaryotes do not have membrane-bound organelles like mitochondria or chloroplasts, but they do have ribosomes. Cell 3 fits that pattern.", "5": "A group of three DNA bases forms a codon, and each codon corresponds to one amino acid.", "6": "If cytokinesis happens before mitosis, the new cells do not divide their DNA correctly, so they end up with the wrong amount of DNA and organelles.", "7": "Specialized cells can express different genes even though they contain the same DNA, so some skin cells produce feathers and others produce scales.", "8": "Photosynthesis converts solar energy into chemical energy stored in glucose.", "9": "Heating denatured the potato enzymes, changing their shape so they could no longer break down hydrogen peroxide.", "10": "A smaller vacuole stores less water, so the cell has less water available for photosynthesis and the rate decreases.", "11": "Cell membranes are selectively permeable, allowing needed materials like water to move in or out to help maintain homeostasis.", "12": "In a high-salinity environment, water leaves the fish cell. The membrane helps maintain homeostasis by allowing water to exit the cell.", "13": "The best test changes only the salt concentration and measures the same type of cells over time, so choice A is the strongest experiment.", "14": "Algae feed zooplankton, and zooplankton are part of the finger mullet\u2019s food supply. Less algae leads to less zooplankton and then fewer finger mullets.", "15": "Those three statements match the food web: red drum get energy by eating mullets, phytoplankton photosynthesize, and producers have the most energy available.", "16": "A stable energy pyramid is widest at the producer level and gets smaller at each higher trophic level, which matches model B.", "17": "A new species often competes with native organisms for food, habitat, or other resources.", "18": "Switching to carbon-free energy reduces greenhouse gas emissions most directly.", "19": "Process X joins two haploid gametes, creating more genetic variation than process Z, which shows cell division producing genetically similar cells.", "20": "The diagram shows exchange of chromosome segments between homologous chromosomes, which is crossing-over.", "21": "The correct Punnett combinations are AB, BO, and OO based on the parents\u2019 gametes shown.", "22": "Melting polar ice reduces sea ice habitat and hunting access, making it harder for polar bears to find food and resources.", "23": "The correct baby must have DNA bands that can all be explained by coming from either the mother or the father. Baby Y fits that pattern.", "24": "Genetically engineered corn that makes its own pesticide can reduce the need for spraying extra chemical pesticides.", "25": "Bacteria populations can evolve resistance, so some may survive the medicine and continue reproducing.", "26": "DNA or nucleotide sequence comparisons give the strongest evidence of common ancestry because they directly compare inherited genetic information.", "27": "Natural selection is supported when a population shows variation, adapts successfully, and has births exceeding deaths over time.", "28": "Rabbits with stronger hind legs can escape wolves more successfully, so that trait becomes more common over time.", "29": "The enzyme works best at 25\u00b0C, so raising the temperature from 15\u00b0C to 25\u00b0C increases the reaction rate toward the optimum.", "30": "Using the dichotomous key: species 1 has more than 5 needles per cluster, species 2 is Pinus strobus, species 3 has long needles in pairs and is Pinus resinosa, and species 4 has short needles in pairs.", "31": "Translation happens on ribosomes. The cell missing functional ribosomes would no longer be able to translate mRNA into amino acids.", "32": "On a phylogenetic tree, the pair sharing the most recent common ancestor are the two whose branches join most recently: chicken and mouse.", "33": "Photosynthesis stores solar energy in carbohydrates, while cellular respiration releases energy from those carbohydrates to make ATP.", "34": "Phytoplankton are producers, so they capture solar energy directly and support organisms higher in the food chain like trout.", "35": "A longer snow season favors white foxes because camouflage in snow improves survival, so white fox numbers would tend to rise while red fox numbers fall.", "36": "Embryo cells are diploid because they formed after fertilization combined genetic material from two haploid gametes.", "37": "Judd\u2019s sister likely inherited a greater proportion of recessive alleles than Judd did, giving her a shorter phenotype.", "38": "Height is a polygenic trait, so it is controlled by multiple genes and shows a wide range of phenotypes.", "39": "The graph shows both 50\u201355 inches and 75\u201380 inches at the edges of the distribution, so both are rare phenotypes.", "40": "The neighborhood data suggest environment, including health and socioeconomic factors, can influence height.", "41": "Mutations create new alleles and add variation to a population\u2019s gene pool, which natural selection can act on.", "42": "Humans have used artificial selection to breed cows with traits linked to better milk production.", "43": "Some bacteria already had or developed resistance, survived the antibiotic, and then reproduced, causing the population to rise again.", "44": "Comparing DNA sequences is the most reliable way to decide whether an organism is a new species.", "45": "The protective receptor mutation helped some people survive plague, so that mutation was selected for and became more common.", "46": "Clones can grow differently in different environments because environment affects gene expression.", "47": "Protein synthesis at the ribosome happens when mRNA interacts with tRNA carrying specific amino acids.", "48": "Photosynthesis makes glucose, and cellular respiration uses that glucose to release energy.", "49": "The bubbles are gases produced during photosynthesis and moving through cell membranes as part of gas exchange and homeostasis.", "50": "The organism branching off closest to the common ancestor among the answer choices is the oldest lineage shown there."};
+
+function normalize(s){
+  return String(s).trim().replace(/\s+/g,' ').replace(/[.;]$/,'').toLowerCase();
+}
+
+function arrEq(a,b){
+  if(a.length !== b.length) return false;
+  const aa=[...a].map(normalize).sort();
+  const bb=[...b].map(normalize).sort();
+  return aa.every((v,i)=>v===bb[i]);
+}
+
+function getResponse(q){
+  const t = types[q];
+  if(t === 'MC'){
+    const checked = document.querySelector(`input[name="q${q}"]:checked`);
+    return checked ? checked.value : '';
+  }
+  if(t === 'IC'){
+    if(q===12) return document.getElementById('q12a').value + '; ' + document.getElementById('q12b').value;
+    if(q===36) return document.getElementById('q36a').value + '; ' + document.getElementById('q36b').value;
+    if(q===38) return document.getElementById('q38a').value + '; ' + document.getElementById('q38b').value;
+  }
+  if(t === 'MS'){
+    return [...document.querySelectorAll(`input[name="q${q}"]:checked`)].map(x=>x.value);
+  }
+  if(t === 'DD'){
+    if(q===21) return [document.getElementById('q21_1').value, document.getElementById('q21_2').value, document.getElementById('q21_3').value];
+    if(q===30) return {
+      "1_characteristic": document.getElementById('q30_1').value,
+      "2_scientific": document.getElementById('q30_2').value,
+      "3_both": document.getElementById('q30_3').value,
+      "4_characteristic": document.getElementById('q30_4').value
+    };
+  }
+  return '';
+}
+
+function isCorrect(q, response){
+  const t = types[q];
+  const correct = answers[q];
+  if(t === 'MC') return normalize(response) === normalize(correct);
+  if(t === 'IC') return normalize(response) === normalize(correct);
+  if(t === 'MS') return arrEq(response, correct);
+  if(t === 'DD'){
+    if(q===21) return arrEq(response, correct);
+    return normalize(response["1_characteristic"])===normalize(correct["1_characteristic"]) &&
+           normalize(response["2_scientific"])===normalize(correct["2_scientific"]) &&
+           normalize(response["3_both"])===normalize(correct["3_both"]) &&
+           normalize(response["4_characteristic"])===normalize(correct["4_characteristic"]);
+  }
+  return false;
+}
+
+function formatCorrect(q){
+  const t = types[q];
+  const correct = answers[q];
+  if(t === 'MC' || t === 'IC') return correct;
+  if(t === 'MS') return correct.join(' | ');
+  if(t === 'DD'){
+    if(q===21) return correct.join(' | ');
+    return `1) ${correct["1_characteristic"]} | 2) ${correct["2_scientific"]} | 3) ${correct["3_both"]} | 4) ${correct["4_characteristic"]}`;
+  }
+}
+
+function markRow(q, ok){
+  const row = document.getElementById(`question-${q}`);
+  row.classList.remove('good','bad');
+  row.classList.add(ok ? 'good' : 'bad');
+}
+
+let currentQuestion = 1;
+const state = {};
+
+function renderSingleRow(q){
+  const temp = document.createElement('div');
+  temp.innerHTML = `<div class="q-row" id="question-1"><div class="q-num">1</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q1" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q1" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q1" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q1" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-2"><div class="q-num">2</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q2" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q2" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q2" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q2" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-3"><div class="q-num">3</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q3" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q3" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q3" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q3" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-4"><div class="q-num">4</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q4" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q4" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q4" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q4" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-5"><div class="q-num">5</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q5" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q5" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q5" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q5" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-6"><div class="q-num">6</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q6" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q6" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q6" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q6" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-7"><div class="q-num">7</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q7" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q7" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q7" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q7" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-8"><div class="q-num">8</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q8" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q8" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q8" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q8" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-9"><div class="q-num">9</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q9" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q9" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q9" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q9" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-10"><div class="q-num">10</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q10" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q10" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q10" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q10" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-11"><div class="q-num">11</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q11" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q11" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q11" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q11" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-12">
+        <div class="q-num">12</div><div class="q-type">IC</div>
+        <div class="q-inputs">
+            <select id="q12a" class="drop"><option value="">Choose first</option><option>maintains homeostasis</option><option>disrupts homeostasis</option><option>creates ATP</option><option>stores glucose</option></select>
+            <select id="q12b" class="drop"><option value="">Choose second</option><option>to enter the cell.</option><option>to exit the cell.</option><option>to make proteins.</option><option>to stay in the nucleus.</option></select>
+        </div></div>
+<div class="q-row" id="question-13"><div class="q-num">13</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q13" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q13" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q13" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q13" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-14"><div class="q-num">14</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q14" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q14" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q14" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q14" value="D"><span>D</span></label></div></div>
+<div class="q-row wide" id="question-15"><div class="q-num">15</div><div class="q-type">MS</div><div class="q-inputs column"><label class="check-item"><input type="checkbox" name="q15" value="The red drum only receives energy by consuming finger mullets."><span>The red drum only receives energy by consuming finger mullets.</span></label><label class="check-item"><input type="checkbox" name="q15" value="The seagrass obtains its energy from the phytoplankton and algae."><span>The seagrass obtains its energy from the phytoplankton and algae.</span></label><label class="check-item"><input type="checkbox" name="q15" value="The phytoplankton produce oxygen and glucose the heron needs to survive."><span>The phytoplankton produce oxygen and glucose the heron needs to survive.</span></label><label class="check-item"><input type="checkbox" name="q15" value="The phytoplankton produce carbon dioxide and glucose the algae need to survive."><span>The phytoplankton produce carbon dioxide and glucose the algae need to survive.</span></label><label class="check-item"><input type="checkbox" name="q15" value="The bull shark and heron populations have the most energy available because they are at the top of the food chain."><span>The bull shark and heron populations have the most energy available because they are at the top of the food chain.</span></label><label class="check-item"><input type="checkbox" name="q15" value="The phytoplankton population has the most energy available because it is at the bottom of the food chain."><span>The phytoplankton population has the most energy available because it is at the bottom of the food chain.</span></label></div></div>
+<div class="q-row" id="question-16"><div class="q-num">16</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q16" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q16" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q16" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q16" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-17"><div class="q-num">17</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q17" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q17" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q17" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q17" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-18"><div class="q-num">18</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q18" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q18" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q18" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q18" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-19"><div class="q-num">19</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q19" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q19" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q19" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q19" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-20"><div class="q-num">20</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q20" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q20" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q20" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q20" value="D"><span>D</span></label></div></div>
+<div class="q-row wide" id="question-21">
+        <div class="q-num">21</div><div class="q-type">DD</div>
+        <div class="q-inputs column">
+            <div class="ddline">Blank 1 <input class="text-input small" id="q21_1" placeholder="AB"></div>
+            <div class="ddline">Blank 2 <input class="text-input small" id="q21_2" placeholder="BO"></div>
+            <div class="ddline">Blank 3 <input class="text-input small" id="q21_3" placeholder="OO"></div>
+        </div></div>
+<div class="q-row" id="question-22"><div class="q-num">22</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q22" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q22" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q22" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q22" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-23"><div class="q-num">23</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q23" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q23" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q23" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q23" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-24"><div class="q-num">24</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q24" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q24" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q24" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q24" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-25"><div class="q-num">25</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q25" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q25" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q25" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q25" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-26"><div class="q-num">26</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q26" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q26" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q26" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q26" value="D"><span>D</span></label></div></div>
+<div class="q-row wide" id="question-27"><div class="q-num">27</div><div class="q-type">MS</div><div class="q-inputs column"><label class="check-item"><input type="checkbox" name="q27" value="The sharks have been able to adapt to changes in their environment."><span>The sharks have been able to adapt to changes in their environment.</span></label><label class="check-item"><input type="checkbox" name="q27" value="The sharks have been unable to adapt to changes in their environment."><span>The sharks have been unable to adapt to changes in their environment.</span></label><label class="check-item"><input type="checkbox" name="q27" value="Individuals are very similar to one another as a result of genetic continuity."><span>Individuals are very similar to one another as a result of genetic continuity.</span></label><label class="check-item"><input type="checkbox" name="q27" value="Individuals differ from one another as a result of genetic diversity."><span>Individuals differ from one another as a result of genetic diversity.</span></label><label class="check-item"><input type="checkbox" name="q27" value="The average number of births has been less than the average number of deaths in the population."><span>The average number of births has been less than the average number of deaths in the population.</span></label><label class="check-item"><input type="checkbox" name="q27" value="The average number of births has been greater than the average number of deaths in the population."><span>The average number of births has been greater than the average number of deaths in the population.</span></label></div></div>
+<div class="q-row" id="question-28"><div class="q-num">28</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q28" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q28" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q28" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q28" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-29"><div class="q-num">29</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q29" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q29" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q29" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q29" value="D"><span>D</span></label></div></div>
+<div class="q-row wide" id="question-30">
+    <div class="q-num">30</div><div class="q-type">DD</div>
+    <div class="q-inputs column">
+        <div class="ddline">Species 1 characteristic <input class="text-input" id="q30_1" placeholder="more than 5 needles in each cluster"></div>
+        <div class="ddline">Species 2 scientific name <input class="text-input" id="q30_2" placeholder="Pinus strobus"></div>
+        <div class="ddline">Species 3 characteristic + name <input class="text-input" id="q30_3" placeholder="long needles clustered in pairs; Pinus resinosa"></div>
+        <div class="ddline">Species 4 characteristic <input class="text-input" id="q30_4" placeholder="short needles clustered in pairs"></div>
+    </div></div>
+<div class="q-row" id="question-31"><div class="q-num">31</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q31" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q31" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q31" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q31" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-32"><div class="q-num">32</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q32" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q32" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q32" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q32" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-33"><div class="q-num">33</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q33" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q33" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q33" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q33" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-34"><div class="q-num">34</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q34" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q34" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q34" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q34" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-35"><div class="q-num">35</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q35" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q35" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q35" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q35" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-36">
+        <div class="q-num">36</div><div class="q-type">IC</div>
+        <div class="q-inputs">
+            <select id="q36a" class="drop"><option value="">Choose first</option><option>haploid</option><option>diploid</option><option>mutated</option><option>specialized</option></select>
+            <select id="q36b" class="drop"><option value="">Choose second</option><option>mitosis.</option><option>meiosis.</option><option>fertilization.</option><option>mutation.</option></select>
+        </div></div>
+<div class="q-row" id="question-37"><div class="q-num">37</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q37" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q37" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q37" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q37" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-38">
+        <div class="q-num">38</div><div class="q-type">IC</div>
+        <div class="q-inputs">
+            <select id="q38a" class="drop"><option value="">Choose first</option><option>one gene</option><option>multiple genes</option><option>one chromosome</option><option>one mutation</option></select>
+            <select id="q38b" class="drop"><option value="">Choose second</option><option>narrow</option><option>wide</option><option>fixed</option><option>single</option></select>
+        </div></div>
+<div class="q-row" id="question-39"><div class="q-num">39</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q39" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q39" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q39" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q39" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-40"><div class="q-num">40</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q40" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q40" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q40" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q40" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-41"><div class="q-num">41</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q41" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q41" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q41" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q41" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-42"><div class="q-num">42</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q42" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q42" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q42" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q42" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-43"><div class="q-num">43</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q43" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q43" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q43" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q43" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-44"><div class="q-num">44</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q44" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q44" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q44" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q44" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-45"><div class="q-num">45</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q45" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q45" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q45" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q45" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-46"><div class="q-num">46</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q46" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q46" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q46" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q46" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-47"><div class="q-num">47</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q47" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q47" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q47" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q47" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-48"><div class="q-num">48</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q48" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q48" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q48" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q48" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-49"><div class="q-num">49</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q49" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q49" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q49" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q49" value="D"><span>D</span></label></div></div>
+<div class="q-row" id="question-50"><div class="q-num">50</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q50" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q50" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q50" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q50" value="D"><span>D</span></label></div></div>`;
+  const target = temp.querySelector(`#question-${q}`);
+  return target ? target.outerHTML : '';
+}
+
+function showQuestion(q){
+  currentQuestion = q;
+  document.getElementById('navNow').textContent = q;
+  document.getElementById('qTitle').textContent = `Question ${q}`;
+  document.getElementById('singleQuestionArea').innerHTML = renderSingleRow(q);
+  restoreState(q);
+  const fb = document.getElementById('feedbackBox');
+  fb.className = 'feedback';
+  fb.innerHTML = '';
+}
+
+function saveState(q){
+  const t = types[q];
+  if(t === 'MC'){
+    const checked = document.querySelector(`#singleQuestionArea input[name="q${q}"]:checked`);
+    state[q] = checked ? checked.value : '';
+  } else if(t === 'IC'){
+    if(q===12) state[q] = [document.getElementById('q12a').value, document.getElementById('q12b').value];
+    if(q===36) state[q] = [document.getElementById('q36a').value, document.getElementById('q36b').value];
+    if(q===38) state[q] = [document.getElementById('q38a').value, document.getElementById('q38b').value];
+  } else if(t === 'MS'){
+    state[q] = [...document.querySelectorAll(`#singleQuestionArea input[name="q${q}"]:checked`)].map(x=>x.value);
+  } else if(t === 'DD'){
+    if(q===21) state[q] = [document.getElementById('q21_1').value, document.getElementById('q21_2').value, document.getElementById('q21_3').value];
+    if(q===30) state[q] = [document.getElementById('q30_1').value, document.getElementById('q30_2').value, document.getElementById('q30_3').value, document.getElementById('q30_4').value];
+  }
+}
+
+function restoreState(q){
+  if(!(q in state)) return;
+  const val = state[q];
+  const t = types[q];
+  if(t==='MC'){
+    const input = document.querySelector(`#singleQuestionArea input[name="q${q}"][value="${val}"]`);
+    if(input) input.checked = true;
+  } else if(t==='IC'){
+    if(q===12){ document.getElementById('q12a').value = val[0] || ''; document.getElementById('q12b').value = val[1] || ''; }
+    if(q===36){ document.getElementById('q36a').value = val[0] || ''; document.getElementById('q36b').value = val[1] || ''; }
+    if(q===38){ document.getElementById('q38a').value = val[0] || ''; document.getElementById('q38b').value = val[1] || ''; }
+  } else if(t==='MS'){
+    val.forEach(v=>{ const input = [...document.querySelectorAll(`#singleQuestionArea input[name="q${q}"]`)].find(x=>x.value===v); if(input) input.checked = true; });
+  } else if(t==='DD'){
+    if(q===21){ document.getElementById('q21_1').value = val[0] || ''; document.getElementById('q21_2').value = val[1] || ''; document.getElementById('q21_3').value = val[2] || ''; }
+    if(q===30){ document.getElementById('q30_1').value = val[0] || ''; document.getElementById('q30_2').value = val[1] || ''; document.getElementById('q30_3').value = val[2] || ''; document.getElementById('q30_4').value = val[3] || ''; }
+  }
+}
+
+function getCurrentResponse(){
+  const q = currentQuestion;
+  const t = types[q];
+  if(t==='MC'){
+    const checked = document.querySelector(`#singleQuestionArea input[name="q${q}"]:checked`);
+    return checked ? checked.value : '';
+  }
+  if(t==='IC'){
+    if(q===12) return document.getElementById('q12a').value + '; ' + document.getElementById('q12b').value;
+    if(q===36) return document.getElementById('q36a').value + '; ' + document.getElementById('q36b').value;
+    if(q===38) return document.getElementById('q38a').value + '; ' + document.getElementById('q38b').value;
+  }
+  if(t==='MS') return [...document.querySelectorAll(`#singleQuestionArea input[name="q${q}"]:checked`)].map(x=>x.value);
+  if(t==='DD'){
+    if(q===21) return [document.getElementById('q21_1').value, document.getElementById('q21_2').value, document.getElementById('q21_3').value];
+    if(q===30) return {
+      "1_characteristic": document.getElementById('q30_1').value,
+      "2_scientific": document.getElementById('q30_2').value,
+      "3_both": document.getElementById('q30_3').value,
+      "4_characteristic": document.getElementById('q30_4').value
+    };
+  }
+  return '';
+}
+
+function checkCurrent(){
+  const q = currentQuestion;
+  saveState(q);
+  const response = getCurrentResponse();
+  const ok = isCorrect(q, response);
+  const fb = document.getElementById('feedbackBox');
+  fb.className = ok ? 'feedback good' : 'feedback bad';
+  fb.innerHTML = `<strong>${ok ? 'Correct' : 'Not quite'}</strong><br>Correct answer: <strong>${formatCorrect(q)}</strong><div style="margin-top:8px">${explanations[q]}</div>`;
+  state[`graded_${q}`] = ok;
+  updateProgress();
+}
+
+function updateProgress(){
+  const gradedKeys = Object.keys(state).filter(k => k.startsWith('graded_'));
+  const answered = gradedKeys.length;
+  const correct = gradedKeys.filter(k => state[k]).length;
+  document.getElementById('progressScore').textContent = `${correct} / ${answered}`;
+  document.getElementById('progressAnswered').textContent = answered;
+}
+
+function nextQuestion(){ saveState(currentQuestion); if(currentQuestion < 50) showQuestion(currentQuestion + 1); }
+function prevQuestion(){ saveState(currentQuestion); if(currentQuestion > 1) showQuestion(currentQuestion - 1); }
+
+showQuestion(1);
+updateProgress();
+</script>
+</body>
+</html>
