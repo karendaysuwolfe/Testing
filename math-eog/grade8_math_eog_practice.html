@@ -74,13 +74,42 @@ button {
   display:grid;
   grid-template-columns: 380px 1fr;
   gap:18px;
+  align-items:start;
+}
+.left-pane, .right-pane {
+  height: calc(100vh - 190px);
+  overflow-y: auto;
+  padding-right: 6px;
+}
+.left-pane {
+  position: sticky;
+  top: 120px;
+}
+.right-pane {
+  position: sticky;
+  top: 120px;
+}
+.left-pane::-webkit-scrollbar, .right-pane::-webkit-scrollbar {
+  width: 10px;
+}
+.left-pane::-webkit-scrollbar-thumb, .right-pane::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 999px;
 }
 @media (max-width: 1100px) {
   .layout { grid-template-columns: 1fr; }
+  .left-pane, .right-pane {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    position: static;
+    top: auto;
+    padding-right: 0;
+  }
 }
 .sticky {
-  position:sticky;
-  top:120px;
+  position: static;
+  top: auto;
 }
 .answer-sheet h2, .pages h2, .results h2 {
   margin-top:0;
@@ -249,7 +278,7 @@ input.bad, .q-row.bad { outline:2px solid #ef4444; }
   </div>
 
   <div class="layout">
-    <div class="answer-sheet sticky">
+    <div class="left-pane answer-sheet sticky">
       <div class="card">
         <h2>Answer Sheet</h2>
         <p class="muted">Questions 1–15</p>
@@ -313,7 +342,7 @@ input.bad, .q-row.bad { outline:2px solid #ef4444; }
       </div>
     </div>
 
-    <div class="pages">
+    <div class="right-pane pages">
       <div class="card">
         <h2>Section 1 Test Booklet</h2>
         <p class="muted">Complete questions 1–15 before beginning the calculator-active section.</p>
