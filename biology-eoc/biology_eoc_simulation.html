@@ -15,10 +15,18 @@ header{padding:26px 20px;background:linear-gradient(135deg,#0f172a,#1e293b);bord
 header h1{margin:0 0 8px 0;font-size:30px}
 header p{margin:0;color:var(--muted);max-width:1000px;line-height:1.5}
 .container{max-width:1450px;margin:0 auto;padding:18px}
-.layout{display:grid;grid-template-columns:420px 1fr;gap:18px}
-@media (max-width:1100px){.layout{grid-template-columns:1fr}}
+.layout{display:grid;grid-template-columns:420px 1fr;gap:18px;align-items:start}
+.left-pane,.right-pane{height:calc(100vh - 190px);overflow-y:auto;padding-right:6px}
+.left-pane{position:sticky;top:110px}
+.right-pane{position:sticky;top:110px}
+.left-pane::-webkit-scrollbar,.right-pane::-webkit-scrollbar{width:10px}
+.left-pane::-webkit-scrollbar-thumb,.right-pane::-webkit-scrollbar-thumb{background:#475569;border-radius:999px}
+@media (max-width:1100px){
+  .layout{grid-template-columns:1fr}
+  .left-pane,.right-pane{height:auto;max-height:none;overflow:visible;position:static;top:auto;padding-right:0}
+}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin:16px 0}
-.sticky{position:sticky;top:110px}
+.sticky{position:static;top:auto}
 .answer-grid{display:grid;gap:10px}
 .q-row{display:grid;grid-template-columns:48px 52px 1fr;gap:10px;align-items:start;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
 .q-row.wide{grid-template-columns:48px 52px 1fr}
@@ -71,7 +79,7 @@ button{border:none;border-radius:10px;padding:12px 16px;cursor:pointer;font-weig
     <p class="muted">Directions: answer from the booklet pages, then grade at the end. Technology-enhanced questions are entered using the answer fields provided.</p>
   </div>
   <div class="layout">
-    <div class="sticky">
+    <div class="left-pane">
       <div class="card">
         <h2>Answer Sheet</h2>
         <div class="answer-grid"><div class="q-row" id="question-1"><div class="q-num">1</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q1" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q1" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q1" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q1" value="D"><span>D</span></label></div></div>
@@ -154,7 +162,7 @@ button{border:none;border-radius:10px;padding:12px 16px;cursor:pointer;font-weig
 <div class="q-row" id="question-50"><div class="q-num">50</div><div class="q-type">MC</div><div class="q-inputs"><label class="pill"><input type="radio" name="q50" value="A"><span>A</span></label><label class="pill"><input type="radio" name="q50" value="B"><span>B</span></label><label class="pill"><input type="radio" name="q50" value="C"><span>C</span></label><label class="pill"><input type="radio" name="q50" value="D"><span>D</span></label></div></div></div>
       </div>
     </div>
-    <div>
+    <div class="right-pane">
       <div class="card">
         <h2>Test Booklet</h2>
         <div class="pages-wrap"><img class="test-page" src="assets/page_03.png" alt="Biology test page 3">
